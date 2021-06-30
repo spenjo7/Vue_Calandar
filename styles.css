@@ -1,0 +1,38 @@
+.grid {
+	display:  grid;
+	grid-template-columns: repeat(7, 1fr);
+	grid-gap: 10px;
+	width: 98%;
+}
+
+.grid > div {
+	border:  1px solid purple;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.grid > div.inactive {
+	background-color: grey;
+}
+
+.grid > .cell_header {
+	background-color: purple;
+	color: white;
+	min-height: 20px;
+	min-width: 100px;
+}
+
+.grid > .full_row {
+	grid-column: 1/-1;
+}
+
+.grid > .currentWeek{
+	background-color: lavender;
+	border: 2px dashed black;
+	border-radius: 5px;
+}
+
+.grid > .currentDay {
+	background-color: yellow;
+}
