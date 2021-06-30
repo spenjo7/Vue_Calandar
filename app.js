@@ -17,7 +17,7 @@ const getDateStats = (baseDate = null) => {
 	let month = js_month +1 
 	let mm = `0${js_month +1}`.slice(-2) // zero-ified and normalized version of month
 
-	let stamp = [yyyy,mm,dd].join('_')
+	let stamp = [yyyy,mm,dd].join('/')
 	// console.log([yyyy, dd, mm, stamp, date, dow, js_month])
 
 	return { yyyy, dd, mm, stamp, date, dow, js_month } // passing multiple version of date/month info for different purposes
@@ -69,7 +69,6 @@ const getDateRange = (baseDate = null) => {
 		current_month_range,
 		padded_current_month_range,
 		baseDate_padded_index,
-		//week_of_month,
 		leading_days,
 		trailing_days,
 		current_week_start_padded_index,
@@ -103,11 +102,13 @@ new Vue({
 			{ dow: "Friday" },
 			{ dow: "Saturday" }
 		],
-		dateStamp: ""
+		year: null,
+		month: null,
+		day: null,
+		baseDate: null
 	},
 	methods: {
 		update(baseDate = null){
-			
 			let date_range_info = getDateRange(baseDate)
 			let { baseDate_info, 
 				padded_current_month_range, 
@@ -123,17 +124,54 @@ new Vue({
 				const details = { 
 					day_of_month: n, 
 					isBaseDate: (ind === baseDate_padded_index),
-					isCurrentWeek: ( ind >= current_week_start_padded_index && ind <= current_week_end_padded_index  ),
+					isCurrentWeek: ( ind >= current_week_start_padded_index && ind < current_week_end_padded_index  ),
 					isPadding: ( ind < leading_days || ind >= trailing_start_index )
 				}
 				
 				return details 
 			})
 			
-			this.dateStamp = baseDate_info.stamp
+			let { yyyy, mm, dd, stamp } = baseDate_info
+
+			this.year = yyyy
+			this.month = mm
+			this.day = dd
+		}, 
+		changeBaseDate(){
+			if(this.day == 0){
+				this.month -= 1 	
+				this.day = 28 // not dealing with figuring out the number of days in the month again right now
+			}
+
+			if(this.day > 31){
+				this.month += 1
+				this.day = 1
+			}
+
+			if(this.month == 0){
+				this.year -= 1
+				this.month = 12
+			}
+			if(this.month > 12 ){
+				this.year += 1
+				this.month = 1
+			}
+
+			if(this.year < 1970){
+				this.year = 1970
+			}
+
+			if(this.year > 2199 ){
+				this.year = 2199
+			}
+
+			this.baseDate = [this.year,this.month,this.day].join('/')
+			//console.log(this.baseDate)
+			this.update(this.baseDate)
 		}
 	},
 	created: function () {
+
 		this.update(this.baseDate)
 	},
 	template: `
@@ -142,7 +180,30 @@ new Vue({
 				<div
 					class="cell_header full_row"
 				>
-					<h1>{{ dateStamp }}</h1>
+
+					<input 
+						type="number"
+						min="1970"
+						max="2199"
+						v-model="year"
+						@change="changeBaseDate"
+					>
+/
+					<input 
+						type="number"
+						min="0"
+						max="12"
+						v-model="month"
+						@change="changeBaseDate"
+					>
+/
+					<input 
+						type="number"
+						min="0"
+						max="32"
+						v-model="day"
+						@change="changeBaseDate"
+					>
 				</div>
 				<div
 					v-for="header in headers"
